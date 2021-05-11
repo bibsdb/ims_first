@@ -1,0 +1,6 @@
+name = Ims
+description = An example provider module for reference and testing. Not for production use.
+core = 7.x
+package = Providers
+version = 0.1
+dependencies[] = ding_provider

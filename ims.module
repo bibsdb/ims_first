@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Module provides availability data from IMS.
+ */
+
+/**
+ * Implements hook_ding_provider().
+ */
+function ims_ding_provider() {
+  return array(
+    'title' => 'IMS: Ding provider',
+    'provides' => array(
+      'availability' => array(
+        'prefix' => 'availability',
+        'file' => 'includes/ims.availability.inc',
+      ),
+    ),
+  );
+}
+
+/**
+ * Return a reversible local_id for a periodical.
+ *
+ * Ding wants an unique id for a periodical. We don't have that, so we pack the
+ * record id and periodical information together in a pseudo id.
+ *
+ * @param string $record_id
+ *   Id of the ting object.
+ * @param FBS\Model\Periodical $periodical
+ *   The Periodical instance.
+ *
+ * @return string
+ *   The pseudo id.
+ */
+function _ims_periodical_get_local_id($record_id, Periodical $periodical) {
+  // We're using - as a placeholder for empty values, it ensures that there'll
+  // be something between the colons, which in turn means we don't have to
+  // deal with the possibility of two colons in a row.
+  $parts = array(
+    !empty($periodical->volume) ? $periodical->volume : '-',
+    !empty($periodical->volumeYear) ? $periodical->volumeYear : '-',
+    !empty($periodical->volumeNumber) ? $periodical->volumeNumber : '-',
+    $record_id,
+  );
+
+  $parts = array_map(function ($part) {
+    // "Escape" the colons, so we can split on ":" later.
+    return strtr($part, array(':' => '::'));
+  }, $parts);
+
+  return 'fbs-' . implode(':', $parts);
+}
